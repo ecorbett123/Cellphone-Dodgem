@@ -180,7 +180,6 @@ class Player:
                         frontier.put(child_location)
             explored.add(state)
 
-
     # returns true if position of location is the position of the target stall
     # TODO: fix this to be within radius of target stall, not directly on it
     def hit_goal(self, location):
@@ -229,10 +228,26 @@ class Player:
                 self.sign_x = 1
         else:
             # post game strategy -> find a place to hide and accumulate phone points
-            self.vx = 0
-            self.vy = 0
+            return self.endgame()
 
         new_pos_x = self.pos_x + self.sign_x * self.vx
         new_pos_y = self.pos_y + self.sign_y * self.vy
 
         return new_pos_x, new_pos_y
+
+    def endgame(self):
+        final_pos_y = 5 if self.pos_y < 50 else 95
+        final_pos_x = 5 if self.pos_x < 50 else 95
+        delta_y = final_pos_y - self.pos_y
+        delta_x = final_pos_x - self.pos_x
+
+        if -1 < delta_y < 1 and -1 < delta_x < 1:
+            return self.pos_x, self.pos_y
+        else:
+            angle = math.atan(numpy.abs(delta_y) / numpy.abs(delta_x))
+            self.vy = math.sin(angle)
+            self.vx = math.cos(angle)
+
+        self.sign_y = -1 if delta_y < 0 else 1
+        self.sign_x = -1 if delta_x < 0 else 1
+        return self.pos_x + self.sign_x * self.vx, self.pos_y + self.sign_y * self.vy
